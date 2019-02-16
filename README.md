@@ -72,199 +72,86 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 
 <table>
    <tr>
+      <td>Teacher</td>
+      <td>Student</td>
       <td>Method</td>
-      <td>teacher</td>
-      <td>student</td>
       <td>CIFAR10</td>
       <td>CIFAR100</td>
    </tr>
    <tr>
-      <td>baseline</td>
       <td>-</td>
-      <td>resnet20</td>
+      <td>resnet-20</td>
+      <td>baseline</td>
       <td>92.18%</td>
       <td>68.33%</td>
    </tr>
    <tr>
-      <td></td>
       <td>-</td>
-      <td>resnet110</td>
+      <td>resnet-110</td>
+      <td>baseline</td>
       <td>94.04%</td>
       <td>72.65%</td>
    </tr>
    <tr>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>logits</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>93.01%</td>
       <td>69.87%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>93.33%</td>
-      <td>69.94%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.48%</td>
-      <td>74.72%</td>
-   </tr>
-   <tr>
       <td>st</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.54%</td>
       <td>69.92%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>92.82%</td>
-      <td>69.45%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.30%</td>
-      <td>74.29%</td>
-   </tr>
-   <tr>
       <td>fitnet</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.48%</td>
       <td>69.05%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>92.55%</td>
-      <td>69.68%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.58%</td>
-      <td>73.21%</td>
-   </tr>
-   <tr>
       <td>at</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.58%</td>
       <td>68.56%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>92.84%</td>
-      <td>69.05%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.34%</td>
-      <td>73.81%</td>
-   </tr>
-   <tr>
       <td>fsp</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.57%</td>
       <td>69.10%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>92.83%</td>
-      <td>69.38%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.29%</td>
-      <td>73.71%</td>
-   </tr>
-   <tr>
       <td>nst</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.35%</td>
       <td>68.35%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>92.51%</td>
-      <td>68.41%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.27%</td>
-      <td>72.84%</td>
-   </tr>
-   <tr>
       <td>pkt</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.83%</td>
       <td>68.83%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>92.95%</td>
-      <td>69.04%</td>
-   </tr>
-   <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.76%</td>
-      <td>73.73%</td>
-   </tr>
-   <tr>
       <td>ft</td>
-      <td>resnet20</td>
-      <td>resnet20</td>
       <td>92.92%</td>
       <td>68.86%</td>
    </tr>
    <tr>
       <td></td>
-      <td>resnet110</td>
-      <td>resnet20</td>
-      <td>93.20%</td>
-      <td>69.45%</td>
-   </tr>
-   <tr>
-      <td></td>
-      <td>resnet110</td>
-      <td>resnet110</td>
-      <td>94.46%</td>
-      <td>73.41%</td>
-   </tr>
-   <tr>
-      <td></td>
    </tr>
 </table>
-
 
 
 ## Requirements
