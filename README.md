@@ -141,9 +141,6 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>92.92%</td>
       <td>68.86%</td>
    </tr>
-   <tr>
-      <td></td>
-   </tr>
 </table>
 
 <table>
@@ -224,9 +221,6 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>93.20%</td>
       <td>69.45%</td>
    </tr>
-   <tr>
-      <td></td>
-   </tr>
 </table>
 
 <table>
@@ -299,9 +293,6 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>ft</td>
       <td>94.46%</td>
       <td>73.41%</td>
-   </tr>
-   <tr>
-      <td></td>
    </tr>
 </table>
 
