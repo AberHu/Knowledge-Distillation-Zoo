@@ -348,9 +348,6 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>94.92%/94.46%</td>
       <td>74.70%/74.91%</td>
    </tr>
-   <tr>
-      <td></td>
-   </tr>
 </table>
 
 
