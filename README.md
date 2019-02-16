@@ -100,50 +100,50 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>69.87%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>st</td>
       <td>92.54%</td>
       <td>69.92%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>fitnet</td>
       <td>92.48%</td>
       <td>69.05%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>at</td>
       <td>92.58%</td>
       <td>68.56%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>fsp</td>
       <td>92.57%</td>
       <td>69.10%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>nst</td>
       <td>92.35%</td>
       <td>68.35%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>pkt</td>
       <td>92.83%</td>
       <td>68.83%</td>
    </tr>
    <tr>
-      <td></td>
-      <td></td>
+      <td>resnet-20</td>
+      <td>resnet-20</td>
       <td>ft</td>
       <td>92.92%</td>
       <td>68.86%</td>
@@ -152,6 +152,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td></td>
    </tr>
 </table>
+
 
 
 ## Requirements
