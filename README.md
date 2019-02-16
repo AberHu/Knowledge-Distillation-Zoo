@@ -18,10 +18,10 @@ This repository is a simple reference, thus many tricks, such as step-by-step tr
   [train_dml.py]()   | deep mutual learning (dml) | [paper](https://arxiv.org/pdf/1706.00384.pdf)
 
 - Note, there are some differences between this repository and the original paper.
-- For `fitnet`: the training procedure is one stage without hint layer.
-- For `at`: I use the sum of absolute values with power p=2 as the attention.
-- For `nst`: I use squared mmd matching.
-- For `dml`: just two nets are employed.
+	- For `fitnet`: the training procedure is one stage without hint layer.
+	- For `at`: I use the sum of absolute values with power p=2 as the attention.
+	- For `nst`: I use squared mmd matching.
+	- For `dml`: just two nets are employed.
 
 ## Datasets
 - CIFAR10
