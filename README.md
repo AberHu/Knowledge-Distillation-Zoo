@@ -27,6 +27,11 @@ This repository is a simple reference, thus many tricks, such as step-by-step tr
 - CIFAR10
 - CIFAR100
 
+## Networks
+- Resnet-20
+- Resnet-110
+The network architectures are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.pdf).
+
 ## Training
 - Creating `./dataset` directory and downloading CIFAR10/CIFAR100 in it.
 - Using the train script, simply specifying the parameters listed in  `train_xxx.py`  as a flag or manually changing them.
