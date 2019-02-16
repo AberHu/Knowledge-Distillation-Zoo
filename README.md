@@ -17,7 +17,7 @@ This repository is a simple reference, thus many tricks, such as step-by-step tr
   [train_ft.py]()   | factor transfer (ft) | [paper](https://arxiv.org/pdf/1802.04977.pdf)
   [train_dml.py]()   | deep mutual learning (dml) | [paper](https://arxiv.org/pdf/1706.00384.pdf)
 
-- Note, there are some differences between this repository and the original paper.
+- Note, there are some differences between this repository and the original paper：
 	- For `fitnet`: the training procedure is one stage without hint layer.
 	- For `at`: I use the sum of absolute values with power p=2 as the attention.
 	- For `nst`: I use squared mmd matching.
@@ -64,28 +64,6 @@ This repository is a simple reference, thus many tricks, such as step-by-step tr
 - The initial models, trained models and training logs are uploaded [here](https://pan.baidu.com/s/1OpNH0E8IcQkiv1tFWsQt_w?errno=0&errmsg=Auth%20Login%20Sucess&&bduss=&ssnerror=0&traceid=#list/path=%2F).
 - The loss trade-off parameters `--lambda_xxx` are not chosen carefully. Thus the following results do not reflect which method is better than the others.
 
-<table>
-<tr>                                       #<tr></tr>的个数为：行数
-    <td rowspan="7"> 合并多行成一列：<br/>  #<td></td>的个数为：列数
-        使用rowspan="n" <br/>
-        跨 n 行合并<br/>
-        </td>
-    <td>文件标识：</td>
-    <td>内容</td>
-</tr>
-<tr>
-    <td>第一行：</td>
-    <td>该写什么呢？</td>
-</tr>
-<tr>
-    <td>第二行：</td>
-    <td>随便写吧！</td>
-</tr>
-<tr>
-    <td>第三行：</td>
-    <td>OK了！</td>
-</tr>
-</table>
 
 
 ## Requirements
