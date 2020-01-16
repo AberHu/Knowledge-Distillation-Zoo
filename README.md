@@ -1,4 +1,6 @@
 # Knowledge-Distillation-Zoo
+Note! 2020.01.16 I will rewtrite this repo by Python3 since Python2 is no longer supported after 2019. The new repo will contain more KD methods and a clearer code orgnization. Pleast stay tuned for this repo.
+
 Pytorch implementation of various Knowledge Distillation methods. 
 
 This repository is a simple reference, thus many tricks, such as step-by-step training, iterative training, ensemble of teachers,  etc. are not considered.
