@@ -1,4 +1,13 @@
+from __future__ import absolute_import
 from __future__ import print_function
+from __future__ import division
+import os
+import sys
+import time
+import logging
+import argparse
+import numpy as np
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -6,22 +15,19 @@ import torch.backends.cudnn as cudnn
 import torchvision.transforms as transforms
 import torchvision.datasets as dst
 
-import argparse
-import os
-import time
-
-from util import AverageMeter, accuracy, transform_time
-from util import load_pretrained_model, save_checkpoint
+from utils import AverageMeter, accuracy, transform_time
+from utils import load_pretrained_model, save_checkpoint
+from utils import create_exp_dir, count_parameters_in_MB
 from network import define_tsnet
 
-parser = argparse.ArgumentParser(description='baseline')
+parser = argparse.ArgumentParser(description='train base net')
 
 # various path
 parser.add_argument('--save_root', type=str, default='./results', help='models and logs are saved here')
 parser.add_argument('--img_root', type=str, default='./datasets', help='path name of image dataset')
 
 # training hyper parameters
-parser.add_argument('--print_freq', type=int, default=10, help='frequency of showing training results on console')
+parser.add_argument('--print_freq', type=int, default=50, help='frequency of showing training results on console')
 parser.add_argument('--epochs', type=int, default=200, help='number of total epochs to run')
 parser.add_argument('--batch_size', type=int, default=128, help='The size of batch')
 parser.add_argument('--lr', type=float, default=0.1, help='initial learning rate')
@@ -30,33 +36,52 @@ parser.add_argument('--weight_decay', type=float, default=1e-4, help='weight dec
 parser.add_argument('--num_class', type=int, default=10, help='number of classes')
 parser.add_argument('--cuda', type=int, default=1)
 
+# others
+parser.add_argument('--seed', type=int, default=2, help='random seed')
+parser.add_argument('--note', type=str, default='try', help='note for this run')
+
 # net and dataset choosen
-parser.add_argument('--data_name', type=str, required=True, help='name of dataset')# cifar10/cifar100
-parser.add_argument('--net_name', type=str, required=True, help='name of basenet')
+parser.add_argument('--data_name', type=str, required=True, help='name of dataset') # cifar10/cifar100
+parser.add_argument('--net_name', type=str, required=True, help='name of basenet')  # resnet20/resnet110
+
+
+args, unparsed = parser.parse_known_args()
+
+args.save_root = os.path.join(args.save_root, args.note)
+create_exp_dir(args.save_root)
+
+log_format = '%(message)s'
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format=log_format)
+fh = logging.FileHandler(os.path.join(args.save_root, 'log.txt'))
+fh.setFormatter(logging.Formatter(log_format))
+logging.getLogger().addHandler(fh)
+
 
 def main():
-	global args
-	args = parser.parse_args()
-	print(args)
-
-	if not os.path.exists(os.path.join(args.save_root,'checkpoint')):
-		os.makedirs(os.path.join(args.save_root,'checkpoint'))
-
+	np.random.seed(args.seed)
+	torch.manual_seed(args.seed)
 	if args.cuda:
+		torch.cuda.manual_seed(args.seed)
+		cudnn.enabled = True
 		cudnn.benchmark = True
+	logging.info("args = %s", args)
+	logging.info("unparsed_args = %s", unparsed)
 
-	print('----------- Network Initialization --------------')
+	logging.info('----------- Network Initialization --------------')
 	net = define_tsnet(name=args.net_name, num_class=args.num_class, cuda=args.cuda)
-	print('-----------------------------------------------')
+	logging.info('%s', net)
+	logging.info("param size = %fMB", count_parameters_in_MB(net))
+	logging.info('-----------------------------------------------')
 
 	# save initial parameters
-	print('saving initial parameters......')
-	save_name = 'baseline_r{}_{:>03}.ckp'.format(args.net_name[6:], 0)
-	save_name = os.path.join(args.save_root, 'checkpoint', save_name)
-	save_checkpoint({
+	logging.info('Saving initial parameters......') 
+	save_path = os.path.join(args.save_root, 'initial_r{}.pth.tar'.format(args.net_name[6:]))
+	torch.save({
 		'epoch': 0,
 		'net': net.state_dict(),
-	}, save_name)
+		'prec@1': 0.0,
+		'prec@5': 0.0,
+	}, save_path)
 
 	# initialize optimizer
 	optimizer = torch.optim.SGD(net.parameters(),
@@ -81,7 +106,7 @@ def main():
 		mean = (0.5071, 0.4865, 0.4409)
 		std  = (0.2673, 0.2564, 0.2762)
 	else:
-		raise Exception('invalid dataset name...')
+		raise Exception('Invalid dataset name...')
 
 	train_transform = transforms.Compose([
 			transforms.Pad(4, padding_mode='reflect'),
@@ -110,31 +135,36 @@ def main():
 					download  = True),
 			batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
+	best_top1 = 0
+	best_top5 = 0
 	for epoch in range(1, args.epochs+1):
-		epoch_start_time = time.time()
-
 		adjust_lr(optimizer, epoch)
 
 		# train one epoch
+		epoch_start_time = time.time()
 		train(train_loader, net, optimizer, criterion, epoch)
-		epoch_time = time.time() - epoch_start_time
-		print('one epoch time is {:02}h{:02}m{:02}s'.format(*transform_time(epoch_time)))
 
 		# evaluate on testing set
-		print('testing the models......')
-		test_start_time = time.time()
-		test(test_loader, net, criterion)
-		test_time = time.time() - test_start_time
-		print('testing time is {:02}h{:02}m{:02}s'.format(*transform_time(test_time)))
+		logging.info('Testing the models......')
+		test_top1, test_top5 = test(test_loader, net, criterion)
+
+		epoch_duration = time.time() - epoch_start_time
+		logging.info('Epoch time: {}s'.format(int(epoch_duration)))
 
 		# save model
-		print('saving models......')
-		save_name = 'baseline_r{}_{:>03}.ckp'.format(args.net_name[6:], epoch)
-		save_name = os.path.join(args.save_root, 'checkpoint', save_name)
+		is_best = False
+		if test_top1 > best_top1:
+			best_top1 = test_top1
+			best_top5 = test_top5
+			is_best = True
+		logging.info('Saving models......')
 		save_checkpoint({
 			'epoch': epoch,
 			'net': net.state_dict(),
-		}, save_name)
+			'prec@1': test_top1,
+			'prec@5': test_top5,
+		}, is_best, args.save_root)
+
 
 def train(train_loader, net, optimizer, criterion, epoch):
 	batch_time = AverageMeter()
@@ -146,17 +176,17 @@ def train(train_loader, net, optimizer, criterion, epoch):
 	net.train()
 
 	end = time.time()
-	for idx, (img, target) in enumerate(train_loader, start=1):
+	for i, (img, target) in enumerate(train_loader, start=1):
 		data_time.update(time.time() - end)
 
 		if args.cuda:
-			img = img.cuda()
-			target = target.cuda()
+			img = img.cuda(non_blocking=True)
+			target = target.cuda(non_blocking=True)
 
-		_, _, _, _, output = net(img)
-		loss = criterion(output, target)
+		_, _, _, _, _, out = net(img)
+		loss = criterion(out, target)
 
-		prec1, prec5 = accuracy(output, target, topk=(1,5))
+		prec1, prec5 = accuracy(out, target, topk=(1,5))
 		losses.update(loss.item(), img.size(0))
 		top1.update(prec1.item(), img.size(0))
 		top5.update(prec5.item(), img.size(0))
@@ -168,15 +198,17 @@ def train(train_loader, net, optimizer, criterion, epoch):
 		batch_time.update(time.time() - end)
 		end = time.time()
 
-		if idx % args.print_freq == 0:
-			print('Epoch[{0}]:[{1:03}/{2:03}] '
-				  'Time:{batch_time.val:.4f} '
-				  'Data:{data_time.val:.4f}  '
-				  'loss:{losses.val:.4f}({losses.avg:.4f})  '
-				  'prec@1:{top1.val:.2f}({top1.avg:.2f})  '
-				  'prec@5:{top5.val:.2f}({top5.avg:.2f})'.format(
-				  epoch, idx, len(train_loader), batch_time=batch_time, data_time=data_time,
-				  losses=losses, top1=top1, top5=top5))
+		if i % args.print_freq == 0:
+			log_str = ('Epoch[{0}]:[{1:03}/{2:03}] '
+					   'Time:{batch_time.val:.4f} '
+					   'Data:{data_time.val:.4f}  '
+					   'loss:{losses.val:.4f}({losses.avg:.4f})  '
+					   'prec@1:{top1.val:.2f}({top1.avg:.2f})  '
+					   'prec@5:{top5.val:.2f}({top5.avg:.2f})'.format(
+					   epoch, i, len(train_loader), batch_time=batch_time, data_time=data_time,
+					   losses=losses, top1=top1, top5=top5))
+			logging.info(log_str)
+
 
 def test(test_loader, net, criterion):
 	losses = AverageMeter()
@@ -186,22 +218,25 @@ def test(test_loader, net, criterion):
 	net.eval()
 
 	end = time.time()
-	for idx, (img, target) in enumerate(test_loader, start=1):
+	for i, (img, target) in enumerate(test_loader, start=1):
 		if args.cuda:
-			img = img.cuda()
-			target = target.cuda()
+			img = img.cuda(non_blocking=True)
+			target = target.cuda(non_blocking=True)
 
 		with torch.no_grad():
-			_, _, _, _, output = net(img)
-			loss = criterion(output, target)
+			_, _, _, _, _, out = net(img)
+			loss = criterion(out, target)
 
-		prec1, prec5 = accuracy(output, target, topk=(1,5))
+		prec1, prec5 = accuracy(out, target, topk=(1,5))
 		losses.update(loss.item(), img.size(0))
 		top1.update(prec1.item(), img.size(0))
 		top5.update(prec5.item(), img.size(0))
 
 	f_l = [losses.avg, top1.avg, top5.avg]
-	print('Loss: {:.4f}, Prec@1: {:.2f}, Prec@5: {:.2f}'.format(*f_l))
+	logging.info('Loss: {:.4f}, Prec@1: {:.2f}, Prec@5: {:.2f}'.format(*f_l))
+
+	return top1.avg, top5.avg
+
 
 def adjust_lr(optimizer, epoch):
 	scale   = 0.1
@@ -210,9 +245,10 @@ def adjust_lr(optimizer, epoch):
 	lr_list += [args.lr*scale*scale] * 50
 
 	lr = lr_list[epoch-1]
-	print('epoch: {}  lr: {}'.format(epoch, lr))
+	logging.info('Epoch: {}  lr: {:.3f}'.format(epoch, lr))
 	for param_group in optimizer.param_groups:
 		param_group['lr'] = lr
+
 
 if __name__ == '__main__':
 	main()

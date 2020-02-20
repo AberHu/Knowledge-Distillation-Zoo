@@ -1,27 +1,46 @@
 # Knowledge-Distillation-Zoo
-Pytorch implementation of various Knowledge Distillation methods. 
+Pytorch implementation of various Knowledge Distillation (KD) methods. 
 
-This repository is a simple reference, thus many tricks, such as step-by-step training, iterative training, ensemble of teachers,  etc. are not considered.
+This repository is a simple reference, mainly focuses on basic knowledge distillation/transfer methods. Thus many tricks and variations, such as step-by-step training, iterative training, ensemble of teachers, ensemble of KD methods, data-free, self-distillation, quantization etc. are not considered. Hope it is useful for your project or research.
 
 ## Lists
-  Filename| Method|  Link
-  :----| :-----: | :----:    
-  [train_baseline.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_baseline.py) | basic cnn with softmax loss |   —    
-  [train_logits.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_logits.py)   | mimic learning via regressing logits (logits) | [paper](http://papers.nips.cc/paper/5484-do-deep-nets-really-need-to-be-deep.pdf) 
-  [train_st.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_st.py)   | soft targets (st) | [paper](https://arxiv.org/pdf/1503.02531.pdf) 
-  [train_fitnet.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_fitnet.py)   | hints for thin deep nets (fitnet) | [paper](https://arxiv.org/pdf/1412.6550.pdf) 
-  [train_at.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_at.py)   | attention transfer (at) | [paper](https://arxiv.org/pdf/1612.03928.pdf) 
-  [train_fsp.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_fsp.py)   | flow of solution procedure (fsp) | [paper](http://openaccess.thecvf.com/content_cvpr_2017/papers/Yim_A_Gift_From_CVPR_2017_paper.pdf) 
-  [train_nst.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_nst.py)   | neural selective transfer (nst) | [paper](https://arxiv.org/pdf/1707.01219.pdf) 
-  [train_pkt.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_pkt.py)   | probabilistic knowledge transfer (pkt) | [paper](http://openaccess.thecvf.com/content_ECCV_2018/papers/Nikolaos_Passalis_Learning_Deep_Representations_ECCV_2018_paper.pdf) 
-  [train_ft.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_ft.py)   | factor transfer (ft) | [paper](https://arxiv.org/pdf/1802.04977.pdf)
-  [train_dml.py](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/train_dml.py)   | deep mutual learning (dml) | [paper](https://arxiv.org/pdf/1706.00384.pdf)
+  Name | Method | Paper Link | Code Link
+  :---- | ----- | :----: | :----:
+  Baseline | basic model with softmax loss | — | [code]()
+  Logits   | mimic learning via regressing logits | [paper](http://papers.nips.cc/paper/5484-do-deep-nets-really-need-to-be-deep.pdf) | [code]()
+  ST       | soft target | [paper](https://arxiv.org/pdf/1503.02531.pdf) | [code]()
+  AT       | attention transfer | [paper](https://arxiv.org/pdf/1612.03928.pdf) | [code]()
+  Fitnet   | hints for thin deep nets | [paper](https://arxiv.org/pdf/1412.6550.pdf) | [code]()
+  NST      | neural selective transfer | [paper](https://arxiv.org/pdf/1707.01219.pdf) | [code]()
+  PKT      | probabilistic knowledge transfer | [paper](http://openaccess.thecvf.com/content_ECCV_2018/papers/Nikolaos_Passalis_Learning_Deep_Representations_ECCV_2018_paper.pdf) | [code]()
+  FSP      | flow of solution procedure | [paper](http://openaccess.thecvf.com/content_cvpr_2017/papers/Yim_A_Gift_From_CVPR_2017_paper.pdf) | [code]()
+  FT       | factor transfer | [paper](http://papers.nips.cc/paper/7541-paraphrasing-complex-network-network-compression-via-factor-transfer.pdf) | [code]()
+  RKD      | relational knowledge distillation | [paper](https://arxiv.org/pdf/1904.05068.pdf) | [code]()
+  AB       | activation boundary | [paper](https://arxiv.org/pdf/1811.03233.pdf) | [code]()
+  SP       | similarity preservation | [paper](https://arxiv.org/pdf/1907.09682.pdf) | [code]()
+  Sobolev  | sobolev/jacobian matching | [paper](https://arxiv.org/pdf/1706.04859.pdf) | [code]()
+  BSS      | boundary supporting samples | [paper](https://arxiv.org/pdf/1805.05532.pdf) | [code]()
+  CC       | correlation congruence | [paper](http://openaccess.thecvf.com/content_ICCV_2019/papers/Peng_Correlation_Congruence_for_Knowledge_Distillation_ICCV_2019_paper.pdf) | [code]()
+  LwM      | learning without memorizing | [paper](https://arxiv.org/pdf/1811.08051.pdf) | [code]()
+  IRG      | instance relationship graph | [paper](http://openaccess.thecvf.com/content_CVPR_2019/papers/Liu_Knowledge_Distillation_via_Instance_Relationship_Graph_CVPR_2019_paper.pdf) | [code]()
+  VID      | variational information distillation | [paper](https://zpascal.net/cvpr2019/Ahn_Variational_Information_Distillation_for_Knowledge_Transfer_CVPR_2019_paper.pdf) | [code]()
+  OFD      | overhaul of feature distillation | [paper](http://openaccess.thecvf.com/content_ICCV_2019/papers/Heo_A_Comprehensive_Overhaul_of_Feature_Distillation_ICCV_2019_paper.pdf) | [code]()
+  AFD      | attention feature distillation | [paper](https://openreview.net/pdf?id=ryxyCeHtPB) | [code]()
+  CRD      | contrastive representation distillation | [paper](https://openreview.net/pdf?id=SkgpBJrtvS) | [code]()
+  DML      | deep mutual learning | [paper](https://zpascal.net/cvpr2018/Zhang_Deep_Mutual_Learning_CVPR_2018_paper.pdf) | [code]()
 
-- Note, there are some differences between this repository and the original paper：
-	- For `fitnet`: the training procedure is one stage without hint layer.
-	- For `at`: I use the sum of absolute values with power p=2 as the attention.
-	- For `nst`: I use squared mmd matching.
-	- For `dml`: just two nets are employed.
+- Note, there are some differences between this repository and the original papers：
+   - For `AT`: I use the sum of absolute values with power p=2 as the attention.
+   - For `Fitnet`: The training procedure is one stage without hint layer.
+   - For `NST`: I employ polynomial kernel with d=2 and c=0.
+   - For `AB`: Two-stage training, the first 50 epochs for initialization, the second stage only employs CE without ST.
+   - For `BSS`: 75% epochs employ CE+BSS loss, the rest 25% only uses CE. In addition, warmup for the first 10 epochs.
+   - For `CC`: For consistency, I only consider CC without instance congruence. Gaussian RBF kernel is employed because Bilinear Pool kernel is similar with PKT. I choose P=2 order Taylor of Gaussian RBF kernel. No special sampling strategy.
+   - For `LwM`: I employ it after rb2 (middle conv layer) but not rb3 (last conv layer), because the base net is resnet with the end of GAP followed by a classifier. If after rb3, the grad-CAN has the same values across H and W in each channel.
+   - For `IRG`: I only use one-to-one mode.
+   - For `VID`: I set the hidden channel size to be same with the output channel size and remove BN in μ.
+   - For `AFD`: I find the original implementation of attention is unstable, thus replace it with a SE block.
+   - For `DML`: Just two nets are employed.
 
 ## Datasets
 - CIFAR10
@@ -35,40 +54,18 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 
 ## Training
 - Creating `./dataset` directory and downloading CIFAR10/CIFAR100 in it.
-- Using the train script, simply specifying the parameters listed in  `train_xxx.py`  as a flag or manually changing them.
-- The parameters I used can be found in the training [logs](https://pan.baidu.com/s/1OpNH0E8IcQkiv1tFWsQt_w?errno=0&errmsg=Auth%20Login%20Sucess&&bduss=&ssnerror=0&traceid=#list/path=%2F).
-- For `baseline`
-```Shell
-    python train_baseline.py
-			--data_name=cifar10/cifar100 \
-			--net_name=resnet20/resnet110 \
-			--num_class=10/100
-```
-- For `logits,st,fitnet,at,fsp,nst,pkt,ft`
-```Shell
-    python train_xxx.py
-		    --s_init=/path/to/your/student_initial_model \
-		    --t_model=/path/to/your/teacher_model \
-			--data_name=cifar10/cifar100  \
-			--t_name=resnet20/resnet110 \
-			--s_name=resnet20/resnet110 \
-			--num_class=10/100
-```
-- For `dml`
-```Shell
-    python train_dml.py
-		    --net1_init=/path/to/your/net1_initial_model \
-		    --net2_init=/path/to/your/net2_initial_model \
-			--data_name=cifar10/cifar100  \
-			--net1_name=resnet20/resnet110 \
-			--net2_name=resnet20/resnet110 \
-			--num_class=10/100
-```
+- Using the script `example_train_script.sh` to train various KD methods. One can simply specify the hyper-parameters listed in `train_xxx.py` or manually change them.
+- The hyper-parameters I used can be found in the [training logs](https://pan.baidu.com/s/1OpNH0E8IcQkiv1tFWsQt_w?errno=0&errmsg=Auth%20Login%20Sucess&&bduss=&ssnerror=0&traceid=#list/path=%2F).
+- Some Notes:
+   - Sobolev/LwM alone is unstable and may be used in conjunction with other KD methods.
+   - If not specified in the original papers, all the methods can be used on the middle feature maps or multiple feature maps are only employed after the last conv layer. It is simple to extend to multiple feature maps.
+   - I assume the size (C, H, W) of features between teacher and student are the same. If not, one could employ 1\*1 conv, linear or pooling to rectify them.
 
 ## Results
 - The trained baseline models are used as teachers. For fair comparison, all the student nets have same initialization with the baseline models.
 - The initial models, trained models and training logs are uploaded [here](https://pan.baidu.com/s/1OpNH0E8IcQkiv1tFWsQt_w?errno=0&errmsg=Auth%20Login%20Sucess&&bduss=&ssnerror=0&traceid=#list/path=%2F).
-- The loss trade-off parameters `--lambda_xxx` are not chosen carefully. Thus the following results do not reflect which method is better than the others.
+- The trade-off parameter `--lambda_kd` and other hyper-parameters are not chosen carefully. Thus the following results do not reflect which method is better than the others.
+- Some relation based methods, e.g. PKT, RKD and CC, have less effectiveness on CIFAR100 dataset. It may be because there are more inter classes but less intra classes in one batch. One could increase the batch size, create memory bank or design advance batch sampling methods.
 
 <table>
    <tr>
@@ -341,8 +338,10 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
    </tr>
 </table>
 
+## Todo List
+- [ ] QuEST
 
 ## Requirements
-- python 2.7
-- pytorch 1.0.0
-- torchvision 0.2.1
+- python 3.7
+- pytorch 1.3.1
+- torchvision 0.4.2

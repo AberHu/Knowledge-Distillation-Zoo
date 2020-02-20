@@ -7,7 +7,6 @@ import time
 import logging
 import argparse
 import numpy as np
-from itertools import chain
 
 import torch
 import torch.nn as nn
@@ -19,10 +18,10 @@ import torchvision.datasets as dst
 from utils import AverageMeter, accuracy, transform_time
 from utils import load_pretrained_model, save_checkpoint
 from utils import create_exp_dir, count_parameters_in_MB
-from network import define_tsnet, define_paraphraser, define_translator
+from network import define_tsnet
 from kd_losses import *
 
-parser = argparse.ArgumentParser(description='factor transfer')
+parser = argparse.ArgumentParser(description='train boundary supporting sample (bss)')
 
 # various path
 parser.add_argument('--save_root', type=str, default='./results', help='models and logs are saved here')
@@ -50,8 +49,9 @@ parser.add_argument('--t_name', type=str, required=True, help='name of teacher')
 parser.add_argument('--s_name', type=str, required=True, help='name of student')    # resnet20/resnet110
 
 # hyperparameter
-parser.add_argument('--lambda_kd', type=float, default=200.0)
-parser.add_argument('--k', type=float, default=0.5)
+parser.add_argument('--lambda_kd', type=float, default=2.0, help='trade-off parameter for kd loss')
+parser.add_argument('--T', type=float, default=3.0, help='temperature for bss')
+parser.add_argument('--attack_size', type=int, default=32, help='num of samples for bss attack')
 
 
 args, unparsed = parser.parse_known_args()
@@ -91,38 +91,24 @@ def main():
 		param.requires_grad = False
 	logging.info('Teacher: %s', tnet)
 	logging.info('Teacher param size = %fMB', count_parameters_in_MB(tnet))
-
-	use_bn = True if args.data_name == 'cifar10' else False
-	in_channels_t = tnet.module.get_channel_num()[3]
-	in_channels_s = snet.module.get_channel_num()[3]
-	paraphraser = define_paraphraser(in_channels_t, args.k, use_bn, args.cuda)
-	logging.info('Paraphraser: %s', paraphraser)
-	logging.info('Paraphraser param size = %fMB', count_parameters_in_MB(paraphraser))
-
-	translator = define_translator(in_channels_s, in_channels_t, args.k, use_bn, args.cuda)
-	logging.info('Translator: %s', paraphraser)
-	logging.info('Translator param size = %fMB', count_parameters_in_MB(translator))
 	logging.info('-----------------------------------------------')
 
 	# initialize optimizer
-	optimizer_para = torch.optim.SGD(paraphraser.parameters(),
-									 lr = args.lr * 0.1, 
-									 momentum = args.momentum, 
-									 weight_decay = args.weight_decay)
-	optimizer = torch.optim.SGD(chain(snet.parameters(),translator.parameters()),
+	optimizer = torch.optim.SGD(snet.parameters(),
 								lr = args.lr, 
 								momentum = args.momentum, 
 								weight_decay = args.weight_decay,
 								nesterov = True)
 
+	# define attacker
+	attacker = BSSAttacker(step_alpha=0.3, num_steps=10, eps=1e-4)
+
 	# define loss functions
-	criterionKD = FT()
+	criterionKD = BSS(args.T)
 	if args.cuda:
-		criterionCls  = torch.nn.CrossEntropyLoss().cuda()
-		criterionPara = torch.nn.MSELoss().cuda()
+		criterionCls = torch.nn.CrossEntropyLoss().cuda()
 	else:
-		criterionCls  = torch.nn.CrossEntropyLoss()
-		criterionPara = torch.nn.MSELoss()
+		criterionCls = torch.nn.CrossEntropyLoss()
 
 	# define transforms
 	if args.data_name == 'cifar10':
@@ -164,16 +150,8 @@ def main():
 			batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
 	# warp nets and criterions for train and test
-	nets = {'snet':snet, 'tnet':tnet, 'paraphraser':paraphraser, 'translator':translator}
+	nets = {'snet':snet, 'tnet':tnet}
 	criterions = {'criterionCls':criterionCls, 'criterionKD':criterionKD}
-
-	# first training the paraphraser
-	logging.info('The first stage, training the paraphraser......')
-	train_para(train_loader, nets, optimizer_para, criterionPara, 30)
-	paraphraser.eval()
-	for param in paraphraser.parameters():
-		param.requires_grad = False
-	logging.info('The second stage, training the student network......')
 
 	best_top1 = 0
 	best_top5 = 0
@@ -182,11 +160,11 @@ def main():
 
 		# train one epoch
 		epoch_start_time = time.time()
-		train(train_loader, nets, optimizer, criterions, epoch)
+		train(train_loader, nets, optimizer, criterions, attacker, epoch)
 
 		# evaluate on testing set
 		logging.info('Testing the models......')
-		test_top1, test_top5 = test(test_loader, nets, criterions)
+		test_top1, test_top5 = test(test_loader, nets, criterions, epoch)
 
 		epoch_duration = time.time() - epoch_start_time
 		logging.info('Epoch time: {}s'.format(int(epoch_duration)))
@@ -207,52 +185,7 @@ def main():
 		}, is_best, args.save_root)
 
 
-def train_para(train_loader, nets, optimizer_para, criterionPara, total_epoch):
-	tnet        = nets['tnet']
-	paraphraser = nets['paraphraser']
-
-	paraphraser.train()
-
-	for epoch in range(1, total_epoch+1):
-		batch_time  = AverageMeter()
-		data_time   = AverageMeter()
-		para_losses = AverageMeter()
-
-		epoch_start_time = time.time()
-		end = time.time()
-		for i, (img, _) in enumerate(train_loader, start=1):
-			data_time.update(time.time() - end)
-
-			if args.cuda:
-				img = img.cuda()
-
-			_, _, _, rb3_t, _, _ = tnet(img)
-			_, rb3_t_rec = paraphraser(rb3_t[1].detach())
-
-			para_loss = criterionPara(rb3_t_rec, rb3_t[1].detach())
-			para_losses.update(para_loss.item(), img.size(0))
-
-			optimizer_para.zero_grad()
-			para_loss.backward()
-			optimizer_para.step()
-
-			batch_time.update(time.time() - end)
-			end = time.time()
-
-			if i % args.print_freq == 0:
-				log_str = ('Epoch[{0}]:[{1:03}/{2:03}] '
-						   'Time:{batch_time.val:.4f} '
-						   'Data:{data_time.val:.4f}  '
-						   'Para:{para_losses.val:.4f}({para_losses.avg:.4f})'.format(
-						   epoch, i, len(train_loader), batch_time=batch_time, data_time=data_time,
-						   para_losses=para_losses))
-				logging.info(log_str)
-
-		epoch_duration = time.time() - epoch_start_time
-		logging.info('Epoch time: {}s'.format(int(epoch_duration)))
-
-
-def train(train_loader, nets, optimizer, criterions, epoch):
+def train(train_loader, nets, optimizer, criterions, attacker, epoch):
 	batch_time = AverageMeter()
 	data_time  = AverageMeter()
 	cls_losses = AverageMeter()
@@ -262,14 +195,13 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 
 	snet = nets['snet']
 	tnet = nets['tnet']
-	paraphraser = nets['paraphraser']
-	translator  = nets['translator']
 
 	criterionCls = criterions['criterionCls']
 	criterionKD  = criterions['criterionKD']
+	# warmup for the first 10 epoch
+	lambda_kd = 0 if epoch <= 10 else max(args.lambda_kd * (1 - 5 / 4 * (epoch-1) / args.epochs), 0)
 
 	snet.train()
-	translator.train()
 
 	end = time.time()
 	for i, (img, target) in enumerate(train_loader, start=1):
@@ -279,13 +211,50 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 			img = img.cuda(non_blocking=True)
 			target = target.cuda(non_blocking=True)
 
-		_, _, _, rb3_s, _, out_s = snet(img)
-		_, _, _, rb3_t, _, _     = tnet(img)
-		factor_s    = translator(rb3_s[1])
-		factor_t, _ = paraphraser(rb3_t[1])
+		_, _, _, _, _, out_s = snet(img)
+		_, _, _, _, _, out_t = tnet(img)
 
 		cls_loss = criterionCls(out_s, target)
-		kd_loss  = criterionKD(factor_s, factor_t.detach()) * args.lambda_kd
+		kd_loss = None
+		if lambda_kd > 0:
+			condition1 = target == out_s.sort(dim=1, descending=True)[1][:,0]
+			condition2 = target == out_t.sort(dim=1, descending=True)[1][:,0]
+			attack_flag = condition1 & condition2
+			if attack_flag.sum():
+				# base sample selection
+				attack_idx = attack_flag.nonzero().view(-1)
+				if attack_idx.shape[0] > args.attack_size:
+					diff  = (F.softmax(out_t[attack_idx,:], 1) - F.softmax(out_s[attack_idx,:], 1)) ** 2
+					score = diff.sum(dim=1) - diff.gather(1, target[attack_idx].unsqueeze(1)).squeeze()
+					attack_idx = attack_idx[score.sort(descending=True)[1][:args.attack_size]]
+
+				# attack class selection
+				attack_class = out_t.sort(dim=1, descending=True)[1][:,1][attack_idx]
+				class_score, class_idx = F.softmax(out_t, 1)[attack_idx, :].sort(dim=1, descending=True)
+				class_score = class_score[:, 1:]
+				class_idx = class_idx[:, 1:]
+
+				rand_size = attack_idx.shape[0]
+				rand_seed = torch.rand([rand_size]).cuda() if args.cuda else torch.rand([rand_size])
+				rand_seed = class_score.sum(dim=1) * rand_seed
+				prob = class_score.cumsum(dim=1)
+				for k in range(attack_idx.shape[0]):
+					for c in range(prob.shape[1]):
+						if (prob[k,c] >= rand_seed[k]).cpu().numpy():
+							attack_class[k] = class_idx[k,c]
+							break
+
+				# forward adversarial samples
+				attacked_img = attacker.attack(tnet,
+											   img[attack_idx, ...],
+											   target[attack_idx],
+											   attack_class)
+				_, _, _, _, _, attacked_out_s = snet(attacked_img)
+				_, _, _, _, _, attacked_out_t = tnet(attacked_img)
+
+				kd_loss = criterionKD(attacked_out_s, attacked_out_t) * lambda_kd
+		if kd_loss is None:
+			kd_loss = torch.zeros(1).cuda() if args.cuda else torch.zeros(1)
 		loss = cls_loss + kd_loss
 
 		prec1, prec5 = accuracy(out_s, target, topk=(1,5))
@@ -306,7 +275,7 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 					   'Time:{batch_time.val:.4f} '
 					   'Data:{data_time.val:.4f}  '
 					   'Cls:{cls_losses.val:.4f}({cls_losses.avg:.4f})  '
-					   'FT:{kd_losses.val:.4f}({kd_losses.avg:.4f})  '
+					   'KD:{kd_losses.val:.4f}({kd_losses.avg:.4f})  '
 					   'prec@1:{top1.val:.2f}({top1.avg:.2f})  '
 					   'prec@5:{top5.val:.2f}({top5.avg:.2f})'.format(
 					   epoch, i, len(train_loader), batch_time=batch_time, data_time=data_time,
@@ -314,22 +283,16 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 			logging.info(log_str)
 
 
-def test(test_loader, nets, criterions):
+def test(test_loader, nets, criterions, epoch):
 	cls_losses = AverageMeter()
-	kd_losses  = AverageMeter()
 	top1       = AverageMeter()
 	top5       = AverageMeter()
 
 	snet = nets['snet']
-	tnet = nets['tnet']
-	paraphraser = nets['paraphraser']
-	translator  = nets['translator']
 
 	criterionCls = criterions['criterionCls']
-	criterionKD  = criterions['criterionKD']
 
 	snet.eval()
-	translator.eval()
 
 	end = time.time()
 	for i, (img, target) in enumerate(test_loader, start=1):
@@ -338,22 +301,17 @@ def test(test_loader, nets, criterions):
 			target = target.cuda(non_blocking=True)
 
 		with torch.no_grad():
-			_, _, _, rb3_s, _, out_s = snet(img)
-			_, _, _, rb3_t, _, _     = tnet(img)
-			factor_s    = translator(rb3_s[1])
-			factor_t, _ = paraphraser(rb3_t[1])
+			_, _, _, _, _, out_s = snet(img)
 
 		cls_loss = criterionCls(out_s, target)
-		kd_loss  = criterionKD(factor_s, factor_t.detach()) * args.lambda_kd
 
 		prec1, prec5 = accuracy(out_s, target, topk=(1,5))
 		cls_losses.update(cls_loss.item(), img.size(0))
-		kd_losses.update(kd_loss.item(), img.size(0))
 		top1.update(prec1.item(), img.size(0))
 		top5.update(prec5.item(), img.size(0))
 
-	f_l = [cls_losses.avg, kd_losses.avg, top1.avg, top5.avg]
-	logging.info('Cls: {:.4f}, KD: {:.4f}, Prec@1: {:.2f}, Prec@5: {:.2f}'.format(*f_l))
+	f_l = [cls_losses.avg, top1.avg, top5.avg]
+	logging.info('Cls: {:.4f}, Prec@1: {:.2f}, Prec@5: {:.2f}'.format(*f_l))
 
 	return top1.avg, top5.avg
 
@@ -365,7 +323,7 @@ def adjust_lr(optimizer, epoch):
 	lr_list += [args.lr*scale*scale] * 50
 
 	lr = lr_list[epoch-1]
-	logging.info('epoch: {}  lr: {:.3f}'.format(epoch, lr))
+	logging.info('Epoch: {}  lr: {:.3f}'.format(epoch, lr))
 	for param_group in optimizer.param_groups:
 		param_group['lr'] = lr
 

@@ -1,6 +1,11 @@
+from __future__ import absolute_import
 from __future__ import print_function
-import torch
+from __future__ import division
+import os
+import shutil
 import numpy as np
+import torch
+
 
 class AverageMeter(object):
 	def __init__(self):
@@ -18,32 +23,40 @@ class AverageMeter(object):
 		self.count += n
 		self.avg   = self.sum / self.count
 
-def print_network(net):
-	num_params = 0
-	for param in net.parameters():
-		num_params += param.numel()
-	print(net)
-	print('Total number of parameters: %d' % num_params)
 
-def load_pretrained_model(model, pretrained_dict, wfc=True):
+def count_parameters_in_MB(model):
+	return sum(np.prod(v.size()) for name, v in model.named_parameters())/1e6
+
+
+def create_exp_dir(path):
+	if not os.path.exists(path):
+		os.makedirs(path)
+	print('Experiment dir : {}'.format(path))
+
+
+def load_pretrained_model(model, pretrained_dict):
 	model_dict = model.state_dict()
 	# 1. filter out unnecessary keys
-	if wfc:
-		pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
-	else:
-		pretrained_dict = {k: v for k, v in pretrained_dict.items() if ((k in model_dict) and ('fc' not in k))}
+	pretrained_dict = {k: v for k, v in pretrained_dict.items() if k in model_dict}
 	# 2. overwrite entries in the existing state dict
 	model_dict.update(pretrained_dict) 
 	# 3. load the new state dict
 	model.load_state_dict(model_dict)
 
+
 def transform_time(s):
-	m, s = divmod(s, 60)
+	m, s = divmod(int(s), 60)
 	h, m = divmod(m, 60)
 	return h,m,s
 
-def save_checkpoint(state, filename):
-	torch.save(state, filename)
+
+def save_checkpoint(state, is_best, save_root):
+	save_path = os.path.join(save_root, 'checkpoint.pth.tar')
+	torch.save(state, save_path)
+	if is_best:
+		best_save_path = os.path.join(save_root, 'model_best.pth.tar')
+		shutil.copyfile(save_path, best_save_path)
+
 
 def accuracy(output, target, topk=(1,)):
 	"""Computes the precision@k for the specified values of k"""

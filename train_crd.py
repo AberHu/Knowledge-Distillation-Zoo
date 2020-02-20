@@ -19,10 +19,12 @@ import torchvision.datasets as dst
 from utils import AverageMeter, accuracy, transform_time
 from utils import load_pretrained_model, save_checkpoint
 from utils import create_exp_dir, count_parameters_in_MB
-from network import define_tsnet, define_paraphraser, define_translator
-from kd_losses import *
+from dataset import CIFAR10IdxSample, CIFAR100IdxSample
+from network import define_tsnet
+from kd_losses import CRD
 
-parser = argparse.ArgumentParser(description='factor transfer')
+
+parser = argparse.ArgumentParser(description='contrastive representation distillation')
 
 # various path
 parser.add_argument('--save_root', type=str, default='./results', help='models and logs are saved here')
@@ -50,8 +52,12 @@ parser.add_argument('--t_name', type=str, required=True, help='name of teacher')
 parser.add_argument('--s_name', type=str, required=True, help='name of student')    # resnet20/resnet110
 
 # hyperparameter
-parser.add_argument('--lambda_kd', type=float, default=200.0)
-parser.add_argument('--k', type=float, default=0.5)
+parser.add_argument('--lambda_kd', type=float, default=1.0, help='trade-off parameter for kd loss')
+parser.add_argument('--feat_dim', type=int, default=128, help='dimension of the projection space')
+parser.add_argument('--nce_n', type=int, default=16384, help='number of negatives paired with each positive')
+parser.add_argument('--nce_t', type=float, default=0.1, help='temperature parameter')
+parser.add_argument('--nce_mom', type=float, default=0.5, help='momentum for non-parametric updates')
+parser.add_argument('--mode', type=str, default='exact', choices=['exact', 'relax'])
 
 
 args, unparsed = parser.parse_known_args()
@@ -91,46 +97,17 @@ def main():
 		param.requires_grad = False
 	logging.info('Teacher: %s', tnet)
 	logging.info('Teacher param size = %fMB', count_parameters_in_MB(tnet))
-
-	use_bn = True if args.data_name == 'cifar10' else False
-	in_channels_t = tnet.module.get_channel_num()[3]
-	in_channels_s = snet.module.get_channel_num()[3]
-	paraphraser = define_paraphraser(in_channels_t, args.k, use_bn, args.cuda)
-	logging.info('Paraphraser: %s', paraphraser)
-	logging.info('Paraphraser param size = %fMB', count_parameters_in_MB(paraphraser))
-
-	translator = define_translator(in_channels_s, in_channels_t, args.k, use_bn, args.cuda)
-	logging.info('Translator: %s', paraphraser)
-	logging.info('Translator param size = %fMB', count_parameters_in_MB(translator))
 	logging.info('-----------------------------------------------')
-
-	# initialize optimizer
-	optimizer_para = torch.optim.SGD(paraphraser.parameters(),
-									 lr = args.lr * 0.1, 
-									 momentum = args.momentum, 
-									 weight_decay = args.weight_decay)
-	optimizer = torch.optim.SGD(chain(snet.parameters(),translator.parameters()),
-								lr = args.lr, 
-								momentum = args.momentum, 
-								weight_decay = args.weight_decay,
-								nesterov = True)
-
-	# define loss functions
-	criterionKD = FT()
-	if args.cuda:
-		criterionCls  = torch.nn.CrossEntropyLoss().cuda()
-		criterionPara = torch.nn.MSELoss().cuda()
-	else:
-		criterionCls  = torch.nn.CrossEntropyLoss()
-		criterionPara = torch.nn.MSELoss()
 
 	# define transforms
 	if args.data_name == 'cifar10':
-		dataset = dst.CIFAR10
+		train_dataset = CIFAR10IdxSample
+		test_dataset  = dst.CIFAR10
 		mean = (0.4914, 0.4822, 0.4465)
 		std  = (0.2470, 0.2435, 0.2616)
 	elif args.data_name == 'cifar100':
-		dataset = dst.CIFAR100
+		train_dataset = CIFAR100IdxSample
+		test_dataset  = dst.CIFAR100
 		mean = (0.5071, 0.4865, 0.4409)
 		std  = (0.2673, 0.2564, 0.2762)
 	else:
@@ -151,29 +128,44 @@ def main():
 
 	# define data loader
 	train_loader = torch.utils.data.DataLoader(
-			dataset(root      = args.img_root,
-					transform = train_transform,
-					train     = True,
-					download  = True),
+			train_dataset(root      = args.img_root,
+						  transform = train_transform,
+						  train     = True,
+						  download  = True,
+						  n         = args.nce_n,
+						  mode      = args.mode),
 			batch_size=args.batch_size, shuffle=True, num_workers=4, pin_memory=True)
 	test_loader = torch.utils.data.DataLoader(
-			dataset(root      = args.img_root,
-					transform = test_transform,
-					train     = False,
-					download  = True),
+			test_dataset(root      = args.img_root,
+						 transform = test_transform,
+						 train     = False,
+						 download  = True),
 			batch_size=args.batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
-	# warp nets and criterions for train and test
-	nets = {'snet':snet, 'tnet':tnet, 'paraphraser':paraphraser, 'translator':translator}
-	criterions = {'criterionCls':criterionCls, 'criterionKD':criterionKD}
+	# define loss functions
+	s_dim = snet.module.get_channel_num()[-2]
+	t_dim = tnet.module.get_channel_num()[-2]
+	if args.cuda:
+		criterionCls = torch.nn.CrossEntropyLoss().cuda()
+		criterionKD  = CRD(s_dim, t_dim, args.feat_dim, args.nce_n,
+						   args.nce_t, args.nce_mom, len(train_loader.dataset)).cuda()
+	else:
+		criterionCls = torch.nn.CrossEntropyLoss()
+		criterionKD  = CRD(s_dim, t_dim, args.feat_dim, args.nce_n,
+						   args.nce_t, args.nce_mom, len(train_loader.dataset))
 
-	# first training the paraphraser
-	logging.info('The first stage, training the paraphraser......')
-	train_para(train_loader, nets, optimizer_para, criterionPara, 30)
-	paraphraser.eval()
-	for param in paraphraser.parameters():
-		param.requires_grad = False
-	logging.info('The second stage, training the student network......')
+	# initialize optimizer
+	optimizer = torch.optim.SGD(chain(snet.parameters(), 
+									  criterionKD.embed_t.parameters(),
+									  criterionKD.embed_s.parameters()),
+								lr = args.lr, 
+								momentum = args.momentum, 
+								weight_decay = args.weight_decay,
+								nesterov = True)
+	
+	# warp nets and criterions for train and test
+	nets = {'snet':snet, 'tnet':tnet}
+	criterions = {'criterionCls':criterionCls, 'criterionKD':criterionKD}
 
 	best_top1 = 0
 	best_top5 = 0
@@ -186,7 +178,7 @@ def main():
 
 		# evaluate on testing set
 		logging.info('Testing the models......')
-		test_top1, test_top5 = test(test_loader, nets, criterions)
+		test_top1, test_top5 = test(test_loader, nets, criterions, epoch)
 
 		epoch_duration = time.time() - epoch_start_time
 		logging.info('Epoch time: {}s'.format(int(epoch_duration)))
@@ -207,51 +199,6 @@ def main():
 		}, is_best, args.save_root)
 
 
-def train_para(train_loader, nets, optimizer_para, criterionPara, total_epoch):
-	tnet        = nets['tnet']
-	paraphraser = nets['paraphraser']
-
-	paraphraser.train()
-
-	for epoch in range(1, total_epoch+1):
-		batch_time  = AverageMeter()
-		data_time   = AverageMeter()
-		para_losses = AverageMeter()
-
-		epoch_start_time = time.time()
-		end = time.time()
-		for i, (img, _) in enumerate(train_loader, start=1):
-			data_time.update(time.time() - end)
-
-			if args.cuda:
-				img = img.cuda()
-
-			_, _, _, rb3_t, _, _ = tnet(img)
-			_, rb3_t_rec = paraphraser(rb3_t[1].detach())
-
-			para_loss = criterionPara(rb3_t_rec, rb3_t[1].detach())
-			para_losses.update(para_loss.item(), img.size(0))
-
-			optimizer_para.zero_grad()
-			para_loss.backward()
-			optimizer_para.step()
-
-			batch_time.update(time.time() - end)
-			end = time.time()
-
-			if i % args.print_freq == 0:
-				log_str = ('Epoch[{0}]:[{1:03}/{2:03}] '
-						   'Time:{batch_time.val:.4f} '
-						   'Data:{data_time.val:.4f}  '
-						   'Para:{para_losses.val:.4f}({para_losses.avg:.4f})'.format(
-						   epoch, i, len(train_loader), batch_time=batch_time, data_time=data_time,
-						   para_losses=para_losses))
-				logging.info(log_str)
-
-		epoch_duration = time.time() - epoch_start_time
-		logging.info('Epoch time: {}s'.format(int(epoch_duration)))
-
-
 def train(train_loader, nets, optimizer, criterions, epoch):
 	batch_time = AverageMeter()
 	data_time  = AverageMeter()
@@ -262,30 +209,29 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 
 	snet = nets['snet']
 	tnet = nets['tnet']
-	paraphraser = nets['paraphraser']
-	translator  = nets['translator']
 
 	criterionCls = criterions['criterionCls']
 	criterionKD  = criterions['criterionKD']
 
 	snet.train()
-	translator.train()
+	criterionKD.embed_s.train()
+	criterionKD.embed_t.train()
 
 	end = time.time()
-	for i, (img, target) in enumerate(train_loader, start=1):
+	for i, (img, target, idx, sample_idx) in enumerate(train_loader, start=1):
 		data_time.update(time.time() - end)
 
 		if args.cuda:
 			img = img.cuda(non_blocking=True)
 			target = target.cuda(non_blocking=True)
+			idx = idx.cuda(non_blocking=True)
+			sample_idx = sample_idx.cuda(non_blocking=True)
 
-		_, _, _, rb3_s, _, out_s = snet(img)
-		_, _, _, rb3_t, _, _     = tnet(img)
-		factor_s    = translator(rb3_s[1])
-		factor_t, _ = paraphraser(rb3_t[1])
+		_, _, _, _, feat_s, out_s = snet(img)
+		_, _, _, _, feat_t, out_t = tnet(img)
 
 		cls_loss = criterionCls(out_s, target)
-		kd_loss  = criterionKD(factor_s, factor_t.detach()) * args.lambda_kd
+		kd_loss  = criterionKD(feat_s, feat_t, idx, sample_idx) * args.lambda_kd
 		loss = cls_loss + kd_loss
 
 		prec1, prec5 = accuracy(out_s, target, topk=(1,5))
@@ -306,7 +252,7 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 					   'Time:{batch_time.val:.4f} '
 					   'Data:{data_time.val:.4f}  '
 					   'Cls:{cls_losses.val:.4f}({cls_losses.avg:.4f})  '
-					   'FT:{kd_losses.val:.4f}({kd_losses.avg:.4f})  '
+					   'KD:{kd_losses.val:.4f}({kd_losses.avg:.4f})  '
 					   'prec@1:{top1.val:.2f}({top1.avg:.2f})  '
 					   'prec@5:{top5.val:.2f}({top5.avg:.2f})'.format(
 					   epoch, i, len(train_loader), batch_time=batch_time, data_time=data_time,
@@ -314,22 +260,16 @@ def train(train_loader, nets, optimizer, criterions, epoch):
 			logging.info(log_str)
 
 
-def test(test_loader, nets, criterions):
+def test(test_loader, nets, criterions, epoch):
 	cls_losses = AverageMeter()
-	kd_losses  = AverageMeter()
 	top1       = AverageMeter()
 	top5       = AverageMeter()
 
 	snet = nets['snet']
-	tnet = nets['tnet']
-	paraphraser = nets['paraphraser']
-	translator  = nets['translator']
 
 	criterionCls = criterions['criterionCls']
-	criterionKD  = criterions['criterionKD']
 
 	snet.eval()
-	translator.eval()
 
 	end = time.time()
 	for i, (img, target) in enumerate(test_loader, start=1):
@@ -338,22 +278,17 @@ def test(test_loader, nets, criterions):
 			target = target.cuda(non_blocking=True)
 
 		with torch.no_grad():
-			_, _, _, rb3_s, _, out_s = snet(img)
-			_, _, _, rb3_t, _, _     = tnet(img)
-			factor_s    = translator(rb3_s[1])
-			factor_t, _ = paraphraser(rb3_t[1])
+			_, _, _, _, _, out_s = snet(img)
 
 		cls_loss = criterionCls(out_s, target)
-		kd_loss  = criterionKD(factor_s, factor_t.detach()) * args.lambda_kd
 
 		prec1, prec5 = accuracy(out_s, target, topk=(1,5))
 		cls_losses.update(cls_loss.item(), img.size(0))
-		kd_losses.update(kd_loss.item(), img.size(0))
 		top1.update(prec1.item(), img.size(0))
 		top5.update(prec5.item(), img.size(0))
 
-	f_l = [cls_losses.avg, kd_losses.avg, top1.avg, top5.avg]
-	logging.info('Cls: {:.4f}, KD: {:.4f}, Prec@1: {:.2f}, Prec@5: {:.2f}'.format(*f_l))
+	f_l = [cls_losses.avg, top1.avg, top5.avg]
+	logging.info('Cls: {:.4f}, Prec@1: {:.2f}, Prec@5: {:.2f}'.format(*f_l))
 
 	return top1.avg, top5.avg
 
@@ -365,7 +300,7 @@ def adjust_lr(optimizer, epoch):
 	lr_list += [args.lr*scale*scale] * 50
 
 	lr = lr_list[epoch-1]
-	logging.info('epoch: {}  lr: {:.3f}'.format(epoch, lr))
+	logging.info('Epoch: {}  lr: {:.3f}'.format(epoch, lr))
 	for param_group in optimizer.param_groups:
 		param_group['lr'] = lr
 
