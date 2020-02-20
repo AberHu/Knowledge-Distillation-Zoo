@@ -54,18 +54,18 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 
 ## Training
 - Creating `./dataset` directory and downloading CIFAR10/CIFAR100 in it.
-- Using the script `example_train_script.sh` to train various KD methods. One can simply specify the hyper-parameters listed in `train_xxx.py` or manually change them.
+- Using the script `example_train_script.sh` to train various KD methods. You can simply specify the hyper-parameters listed in `train_xxx.py` or manually change them.
 - The hyper-parameters I used can be found in the [training logs]().
 - Some Notes:
 	- Sobolev/LwM alone is unstable and may be used in conjunction with other KD methods.
 	- If not specified in the original papers, all the methods can be used on the middle feature maps or multiple feature maps are only employed after the last conv layer. It is simple to extend to multiple feature maps.
-	- I assume the size (C, H, W) of features between teacher and student are the same. If not, one could employ 1\*1 conv, linear or pooling to rectify them.
+	- I assume the size (C, H, W) of features between teacher and student are the same. If not, you could employ 1\*1 conv, linear or pooling to rectify them.
 
 ## Results
 - The trained baseline models are used as teachers. For fair comparison, all the student nets have same initialization with the baseline models.
 - The initial models, trained models and training logs are uploaded [here]().
 - The trade-off parameter `--lambda_kd` and other hyper-parameters are not chosen carefully. Thus the following results do not reflect which method is better than the others.
-- Some relation based methods, e.g. PKT, RKD and CC, have less effectiveness on CIFAR100 dataset. It may be because there are more inter classes but less intra classes in one batch. One could increase the batch size, create memory bank or design advance batch sampling methods.
+- Some relation based methods, e.g. PKT, RKD and CC, have less effectiveness on CIFAR100 dataset. It may be because there are more inter classes but less intra classes in one batch. You could increase the batch size, create memory bank or design advance batch sampling methods.
 
 <table>
    <tr>
