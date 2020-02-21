@@ -3,6 +3,8 @@ Pytorch implementation of various Knowledge Distillation (KD) methods.
 
 This repository is a simple reference, mainly focuses on basic knowledge distillation/transfer methods. Thus many tricks and variations, such as step-by-step training, iterative training, ensemble of teachers, ensemble of KD methods, data-free, self-distillation, quantization etc. are not considered. Hope it is useful for your project or research.
 
+I will update this repo regularly with new KD methods. If there some basic methods I missed, please contact with me.
+
 ## Lists
   Name | Method | Paper Link | Code Link
   :---- | ----- | :----: | :----:
@@ -58,6 +60,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - The hyper-parameters I used can be found in the [training logs]().
 - Some Notes:
 	- Sobolev/LwM alone is unstable and may be used in conjunction with other KD methods.
+   - BSS may occasionally destroy the training procedure, leading to poor results.
 	- If not specified in the original papers, all the methods can be used on the middle feature maps or multiple feature maps are only employed after the last conv layer. It is simple to extend to multiple feature maps.
 	- I assume the size (C, H, W) of features between teacher and student are the same. If not, you could employ 1\*1 conv, linear or pooling to rectify them.
 
@@ -170,8 +173,8 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>resnet-20</td>
       <td>resnet-20</td>
       <td>BSS</td>
-      <td>%</td>
-      <td>%</td>
+      <td>92.58%</td>
+      <td>69.96%</td>
    </tr>
    <tr>
       <td>resnet-20</td>
@@ -335,8 +338,8 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>resnet-110</td>
       <td>resnet-20</td>
       <td>BSS</td>
-      <td>%</td>
-      <td>%</td>
+      <td>92.78%</td>
+      <td>69.71%</td>
    </tr>
    <tr>
       <td>resnet-110</td>
@@ -493,8 +496,8 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
       <td>resnet-110</td>
       <td>resnet-110</td>
       <td>BSS</td>
-      <td>%</td>
-      <td>%</td>
+      <td>94.19%</td>
+      <td>73.87%</td>
    </tr>
    <tr>
       <td>resnet-110</td>
@@ -594,9 +597,21 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 </table>
 
 ## Todo List
+- [ ] KDSVD (now has some bugs)
 - [ ] QuEST
+- [ ] EEL
 
 ## Requirements
 - python 3.7
 - pytorch 1.3.1
 - torchvision 0.4.2
+
+## Acknowledgements
+This repo is partly based on the following repos, thank the authors a lot.
+- [HobbitLong/RepDistiller](https://github.com/HobbitLong/RepDistiller)
+- [bhheo/BSS_distillation](https://github.com/bhheo/BSS_distillation)
+- [clovaai/overhaul-distillation](https://github.com/clovaai/overhaul-distillation)
+- [passalis/probabilistic_kt](https://github.com/passalis/probabilistic_kt)
+- [lenscloth/RKD](https://github.com/lenscloth/RKD)
+
+If you employ the listed KD methods in your research, please cite the corresponding papers.
