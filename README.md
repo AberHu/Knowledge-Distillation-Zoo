@@ -57,7 +57,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 ## Training
 - Creating `./dataset` directory and downloading CIFAR10/CIFAR100 in it.
 - Using the script `example_train_script.sh` to train various KD methods. You can simply specify the hyper-parameters listed in `train_xxx.py` or manually change them.
-- The hyper-parameters I used can be found in the [training logs](https://pan.baidu.com/s/1A0-FCggjwnAtCCoSpGsjzA) (Code: ezed).
+- The hyper-parameters I used can be found in the [training logs](https://pan.baidu.com/s/1A0-FCggjwnAtCCoSpGsjzA) (code: ezed).
 - Some Notes:
 	- Sobolev/LwM alone is unstable and may be used in conjunction with other KD methods.
    - BSS may occasionally destroy the training procedure, leading to poor results.
@@ -66,7 +66,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 
 ## Results
 - The trained baseline models are used as teachers. For fair comparison, all the student nets have same initialization with the baseline models.
-- The initial models, trained models and training logs are uploaded [here](https://pan.baidu.com/s/1A0-FCggjwnAtCCoSpGsjzA) (Code: ezed).
+- The initial models, trained models and training logs are uploaded [here](https://pan.baidu.com/s/1A0-FCggjwnAtCCoSpGsjzA) (code: ezed).
 - The trade-off parameter `--lambda_kd` and other hyper-parameters are not chosen carefully. Thus the following results do not reflect which method is better than the others.
 - Some relation based methods, e.g. PKT, RKD and CC, have less effectiveness on CIFAR100 dataset. It may be because there are more inter classes but less intra classes in one batch. You could increase the batch size, create memory bank or design advance batch sampling methods.
 
