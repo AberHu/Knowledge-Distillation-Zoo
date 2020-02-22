@@ -42,7 +42,7 @@ I will update this repo regularly with new KD methods. If there some basic metho
 	- For `IRG`: I only use one-to-one mode.
 	- For `VID`: I set the hidden channel size to be same with the output channel size and remove BN in μ.
 	- For `AFD`: I find the original implementation of attention is unstable, thus replace it with a SE block.
-	- For `DML`: Just two nets are employed.
+	- For `DML`: Just two nets are employed. Synchronous update to avoid multiple forwards.
 
 ## Datasets
 - CIFAR10
