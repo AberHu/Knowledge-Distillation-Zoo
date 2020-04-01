@@ -601,6 +601,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] QuEST
 - [ ] EEL
 - [ ] AdvFD
+- [ ] CS-KD
 
 ## Requirements
 - python 3.7
