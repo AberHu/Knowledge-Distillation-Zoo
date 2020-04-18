@@ -52,7 +52,7 @@ parser.add_argument('--t_name', type=str, required=True, help='name of teacher')
 parser.add_argument('--s_name', type=str, required=True, help='name of student')    # resnet20/resnet110
 
 # hyperparameter
-parser.add_argument('--lambda_kd', type=float, default=1.0, help='trade-off parameter for kd loss')
+parser.add_argument('--lambda_kd', type=float, default=0.2, help='trade-off parameter for kd loss')
 parser.add_argument('--feat_dim', type=int, default=128, help='dimension of the projection space')
 parser.add_argument('--nce_n', type=int, default=16384, help='number of negatives paired with each positive')
 parser.add_argument('--nce_t', type=float, default=0.1, help='temperature parameter')
