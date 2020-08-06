@@ -602,6 +602,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] EEL
 - [ ] AdvFD
 - [ ] CS-KD
+- [ ] PAD
 
 ## Requirements
 - python 3.7
