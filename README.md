@@ -598,6 +598,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 
 ## Todo List
 - [ ] KDSVD (now has some bugs)
+- [ ] MHGD
 - [ ] QuEST
 - [ ] EEL
 - [ ] AdvFD
