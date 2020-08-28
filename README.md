@@ -598,11 +598,13 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 
 ## Todo List
 - [ ] KDSVD (now has some bugs)
-- [ ] QuEST
-- [ ] EEL
-- [ ] AdvFD
-- [ ] CS-KD
-- [ ] PAD
+- [ ] QuEST: Quantized Embedding Space for Transferring Knowledge
+- [ ] EEL: Learning an Evolutionary Embedding via Massive Knowledge Distillation
+- [ ] AdvFD: Feature-map-level Online Adversarial Knowledge Distillation
+- [ ] CS-KD: Regularizing Class-wise Predictions via Self-knowledge Distillation
+- [ ] PAD: Prime-Aware Adaptive Distillation
+- [ ] CD: Channel Distillation: Channel-Wise Attention for Knowledge Distillation
+- [ ] DCM: Knowledge Transfer via Dense Cross-Layer Mutual-Distillation
 
 ## Requirements
 - python 3.7
