@@ -29,7 +29,7 @@ I will update this repo regularly with new KD methods. If there some basic metho
   OFD      | overhaul of feature distillation | [paper](http://openaccess.thecvf.com/content_ICCV_2019/papers/Heo_A_Comprehensive_Overhaul_of_Feature_Distillation_ICCV_2019_paper.pdf) | [code](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/kd_losses/ofd.py)
   AFD      | attention feature distillation | [paper](https://openreview.net/pdf?id=ryxyCeHtPB) | [code](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/kd_losses/afd.py)
   CRD      | contrastive representation distillation | [paper](https://openreview.net/pdf?id=SkgpBJrtvS) | [code](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/kd_losses/crd.py)
-  DML      | deep mutual learning | [paper](https://zpascal.net/cvpr2018/Zhang_Deep_Mutual_Learning_CVPR_2018_paper.pdf) | [code](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/kd_losses/dml.py)
+  DML      | deep mutual learning | [paper](https://openaccess.thecvf.com/content_cvpr_2018/papers/Zhang_Deep_Mutual_Learning_CVPR_2018_paper.pdf) | [code](https://github.com/AberHu/Knowledge-Distillation-Zoo/blob/master/kd_losses/dml.py)
 
 - Note, there are some differences between this repository and the original papers：
 	- For `AT`: I use the sum of absolute values with power p=2 as the attention.
