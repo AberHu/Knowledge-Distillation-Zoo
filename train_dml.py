@@ -84,7 +84,7 @@ def main():
 	net2 = define_tsnet(name=args.net2_name, num_class=args.num_class, cuda=args.cuda)
 	checkpoint = torch.load(args.net2_init)
 	load_pretrained_model(net2, checkpoint['net'])
-	logging.info('Net2: %s', net1)
+	logging.info('Net2: %s', net2)
 	logging.info('Net2 param size = %fMB', count_parameters_in_MB(net2))
 	logging.info('-----------------------------------------------')
 
