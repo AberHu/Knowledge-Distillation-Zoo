@@ -605,6 +605,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] PAD: Prime-Aware Adaptive Distillation
 - [ ] CD: Channel Distillation: Channel-Wise Attention for Knowledge Distillation
 - [ ] DCM: Knowledge Transfer via Dense Cross-Layer Mutual-Distillation
+- [ ] ESKD: On the Efficacy of Knowledge Distillation
 
 ## Requirements
 - python 3.7
