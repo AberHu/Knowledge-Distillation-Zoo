@@ -607,6 +607,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] DCM: Knowledge Transfer via Dense Cross-Layer Mutual-Distillation
 - [ ] ESKD: On the Efficacy of Knowledge Distillation
 - [ ] GKA: Teachers Do More Than Teach: Compressing Image-to-Image Models
+- [ ] KD-fn: Feature Normalized Knowledge Distillation for Image Classification
 
 ## Requirements
 - python 3.7
