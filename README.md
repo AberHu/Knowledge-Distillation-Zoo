@@ -612,6 +612,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] CSKD: Improving Knowledge Distillation via Category Structure
 - [ ] CD & GKD: Channel Distillation: Channel-Wise Attention for Knowledge Distillation
 - [ ] CRCD: Complementary Relation Contrastive Distillation
+- [ ] MGD: Matching Guided Distillation
 
 ## Requirements
 - python 3.7
