@@ -59,16 +59,16 @@ def save_checkpoint(state, is_best, save_root):
 
 
 def accuracy(output, target, topk=(1,)):
-	"""Computes the precision@k for the specified values of k"""
-	maxk = max(topk)
-	batch_size = target.size(0)
+    with torch.no_grad():
+        maxk = max(topk)
+        batch_size = target.size(0)
 
-	_, pred = output.topk(maxk, 1, True, True)
-	pred    = pred.t()
-	correct = pred.eq(target.view(1, -1).expand_as(pred))
+        _, pred = output.topk(maxk, 1, True, True)
+        pred = pred.t()
+        correct = pred.eq(target[None])
 
-	res = []
-	for k in topk:
-		correct_k = correct[:k].view(-1).float().sum(0)
-		res.append(correct_k.mul_(100.0 / batch_size))
-	return res
+        res = []
+        for k in topk:
+            correct_k = correct[:k].flatten().sum(dtype=torch.float32)
+            res.append(correct_k * (100.0 / batch_size))
+        return res
