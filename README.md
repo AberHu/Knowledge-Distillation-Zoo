@@ -614,6 +614,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] CRCD: Complementary Relation Contrastive Distillation
 - [ ] MGD: Matching Guided Distillation
 - [ ] SSKD: Knowledge Distillation Meets Self-Supervision
+- [ ] KR: Distilling Knowledge via Knowledge Review
 
 ## Requirements
 - python 3.7
