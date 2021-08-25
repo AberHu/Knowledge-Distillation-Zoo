@@ -603,7 +603,6 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] OnAdvFD: Feature-map-level Online Adversarial Knowledge Distillation
 - [ ] CS-KD: Regularizing Class-wise Predictions via Self-knowledge Distillation
 - [ ] PAD: Prime-Aware Adaptive Distillation
-- [ ] CD: Channel Distillation: Channel-Wise Attention for Knowledge Distillation
 - [ ] DCM: Knowledge Transfer via Dense Cross-Layer Mutual-Distillation
 - [ ] ESKD: On the Efficacy of Knowledge Distillation
 - [ ] GKA: Teachers Do More Than Teach: Compressing Image-to-Image Models
