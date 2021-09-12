@@ -607,7 +607,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] ESKD: On the Efficacy of Knowledge Distillation
 - [ ] GKA: Teachers Do More Than Teach: Compressing Image-to-Image Models
 - [ ] KD-fn: Feature Normalized Knowledge Distillation for Image Classification
-- [ ] SMKD: Knowledge Distillation via Adaptive Instance Normalization
+- [ ] FSD: Knowledge Distillation via Adaptive Instance Normalization
 - [ ] CSKD: Improving Knowledge Distillation via Category Structure
 - [ ] CD & GKD: Channel Distillation: Channel-Wise Attention for Knowledge Distillation
 - [ ] CRCD: Complementary Relation Contrastive Distillation
