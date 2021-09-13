@@ -615,6 +615,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] SSKD: Knowledge Distillation Meets Self-Supervision
 - [ ] KR: Distilling Knowledge via Knowledge Review
 - [ ] AFD-SAD: Show, Attend and Distill: Knowledge Distillation via Attention-based Feature Matching
+- [ ] SRRL: Knowledge Distillation via Softmax Regression Representation Learning
 
 ## Requirements
 - python 3.7
