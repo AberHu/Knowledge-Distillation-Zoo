@@ -617,7 +617,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] AFD-SAD: Show, Attend and Distill: Knowledge Distillation via Attention-based Feature Matching
 - [ ] SRRL: Knowledge Distillation via Softmax Regression Representation Learning
 - [ ] SemCKD: Cross-Layer Distillation with Semantic Calibration
-
+- [ ] SKD: Reducing the Teacher-Student Gap via Spherical Knowledge Disitllation
 
 ## Requirements
 - python 3.7
