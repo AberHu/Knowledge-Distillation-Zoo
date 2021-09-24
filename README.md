@@ -618,6 +618,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] SRRL: Knowledge Distillation via Softmax Regression Representation Learning
 - [ ] SemCKD: Cross-Layer Distillation with Semantic Calibration
 - [ ] SKD: Reducing the Teacher-Student Gap via Spherical Knowledge Disitllation
+- [ ] IFM: Heterogeneous Knowledge Distillation using Information Flow Modeling
 
 ## Requirements
 - python 3.7
