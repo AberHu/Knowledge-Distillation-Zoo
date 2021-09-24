@@ -620,6 +620,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] SKD: Reducing the Teacher-Student Gap via Spherical Knowledge Disitllation
 - [ ] IFM: Heterogeneous Knowledge Distillation using Information Flow Modeling
 - [ ] LKD: Local Correlation Consistency for Knowledge Distillation
+- [ ] HKD: Distilling Holistic Knowledge with Graph Neural Networks
 
 ## Requirements
 - python 3.7
