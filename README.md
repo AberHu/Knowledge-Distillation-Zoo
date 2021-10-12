@@ -621,6 +621,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] IFM: Heterogeneous Knowledge Distillation using Information Flow Modeling
 - [ ] LKD: Local Correlation Consistency for Knowledge Distillation
 - [ ] HKD: Distilling Holistic Knowledge with Graph Neural Networks
+- [ ] LONDON: Lipschitz Continuity Guided Knowledge Distillation
 
 ## Requirements
 - python 3.7
