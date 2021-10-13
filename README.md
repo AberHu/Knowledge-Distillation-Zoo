@@ -622,6 +622,7 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] LKD: Local Correlation Consistency for Knowledge Distillation
 - [ ] HKD: Distilling Holistic Knowledge with Graph Neural Networks
 - [ ] LONDON: Lipschitz Continuity Guided Knowledge Distillation
+- [ ] CDD: Channel-Wise Knowledge Distillation for Dense Prediction
 
 ## Requirements
 - python 3.7
