@@ -618,13 +618,17 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] SRRL: Knowledge Distillation via Softmax Regression Representation Learning
 - [ ] SemCKD: Cross-Layer Distillation with Semantic Calibration
 - [ ] SKD: Reducing the Teacher-Student Gap via Spherical Knowledge Disitllation
-- [ ] IFM: Heterogeneous Knowledge Distillation using Information Flow Modeling
+- [ ] IFDM: Heterogeneous Knowledge Distillation using Information Flow Modeling
 - [ ] LKD: Local Correlation Consistency for Knowledge Distillation
 - [ ] HKD: Distilling Holistic Knowledge with Graph Neural Networks
 - [ ] LONDON: Lipschitz Continuity Guided Knowledge Distillation
 - [ ] CDD: Channel-Wise Knowledge Distillation for Dense Prediction
 - [ ] SCKD: Student Customized Knowledge Distillation: Bridging the Gap Between Student and Teacher
 - [ ] ICKD: Exploring Inter-Channel Correlation for Diversity-preserved Knowledge Distillation
+- [ ] DKMF: Distilling Knowledge by Mimicking Features
+- [ ] CRCD: Complementary Relation Contrastive Distillation
+- [ ] WCoRD: Wasserstein Contrastive Representation Distillation
+- [ ] LKD: Local Correlation Consistency for Knowledge Distillation
 
 ## Requirements
 - python 3.7
