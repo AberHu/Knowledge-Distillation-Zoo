@@ -1,4 +1,6 @@
 # Knowledge-Distillation-Zoo
+***News! I'm going to have a major update of this repo. The new version will contain most of the methods in Todo list. Please stay tuned.***
+
 Pytorch implementation of various Knowledge Distillation (KD) methods. 
 
 This repository is a simple reference, mainly focuses on basic knowledge distillation/transfer methods. Thus many tricks and variations, such as step-by-step training, iterative training, ensemble of teachers, ensemble of KD methods, data-free, self-distillation, online distillation etc. are not considered. Hope it is useful for your project or research.
