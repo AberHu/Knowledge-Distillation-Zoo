@@ -631,6 +631,9 @@ The networks are same with Tabel 6 in [paper](https://arxiv.org/pdf/1512.03385.p
 - [ ] CRCD: Complementary Relation Contrastive Distillation
 - [ ] WCoRD: Wasserstein Contrastive Representation Distillation
 - [ ] LKD: Local Correlation Consistency for Knowledge Distillation
+- [ ] KDCL: Online Knowledge Distillation via Collaborative Learning
+- [ ] ONE: Knowledge Distillation by On-the-Fly Native Ensemble
+
 
 ## Requirements
 - python 3.7
